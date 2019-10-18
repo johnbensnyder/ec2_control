@@ -19,7 +19,7 @@ class Cluster_Shell:
     return ssh
 
   def node_bash(self, hostname, command):
-  	ssh = self.create_connection()
+    ssh = self.create_connection()
     ssh.connect(hostname=hostname, username=self.user_name,
                      key_filename=self.cluster.pemfile)
     stdin, stdout, stderr = ssh.exec_command(command)
@@ -27,19 +27,19 @@ class Cluster_Shell:
     return stdin, stdout, stderr
 
   def master_bash(self, command):
-  	return self.node_bash(self.master_public_ip, command)
+    return self.node_bash(self.master_public_ip, command)
 
   def worker_bash(self, command):
-  	"""
-		asynchronous execution of command on all worker nodes
-  	"""
-  	async def async_node_bash(hostname, command):
-  		return self.node_bash(hostname, command)
-  	tasks = {worker:  asyncio.ensure_future(async_node_bash(worker, command)) \
-  						 for worker in self.workers_public_ip}
-  	await asyncio.wait(tasks)
-  	result = {worker: task.result() for worker, task in tasks.items()}
-  	return result
+    """
+    asynchronous execution of command on all worker nodes
+    """
+    async def async_node_bash(hostname, command):
+      return self.node_bash(hostname, command)
+    tasks = {worker:  asyncio.ensure_future(async_node_bash(worker, command)) \
+               for worker in self.workers_public_ip}
+    await asyncio.wait(tasks)
+    result = {worker: task.result() for worker, task in tasks.items()}
+    return result
 
 
 
