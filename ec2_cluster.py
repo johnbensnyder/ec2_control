@@ -72,5 +72,3 @@ class EC2_Cluster:
 		return [info['PrivateIpAddress'] for info in reservation['Instances'] \
 																		for reservation in self.instance_info['Reservations']]
 	
-
-
