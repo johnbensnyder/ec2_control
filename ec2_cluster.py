@@ -2,22 +2,16 @@ import boto3
 import yaml
 
 class EC2_Cluster:
-	subnets = {'us-east-1a': 'subnet-d7b30f9d',
-								'us-east-1b': 'subnet-58b35b04',
-								'us-east-1c': 'subnet-b440b9d3',
-								'us-east-1d': 'subnet-2ef71d00',
-								'us-east-1e': 'subnet-7e9b9341',
-								'us-east-1f': 'subnet-21ac2f2e'}
 
 	def __init__(self, config=None, **kwargs):
 		self.instances = None
 		if config:
-      with open(config) as infile:
-        params = yaml.safe_load(infile)
-      for i,j in params.items():
-        kwargs[i]=j
-    for param, value in kwargs.items():
-    	self.__dict__[param] = value
+			with open(config) as infile:
+				params = yaml.safe_load(infile)
+			for i,j in params.items():
+				kwargs[i]=j
+		for param, value in kwargs.items():
+			self.__dict__[param] = value
 		self.args = self.create_config()
 		self.ec2_session = boto3.Session().resource('ec2')
 		self.ec2_client=boto3.client('ec2')
