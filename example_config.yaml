@@ -1,0 +1,12 @@
+name: "some-name-for-instances"
+image_id: "ami-0c4jrn5jskd"
+keypair: "key"
+node_count: 16
+pemfile: "/path/to/a/key.pem"
+zone: "us-east-1c"
+subnet: "subnet-c65j3n45"
+instance_type: "p3dn.24xlarge"
+min_nodes: 
+efa: True
+security_groups:
+  - 'sg-0pr4jfneij4452'

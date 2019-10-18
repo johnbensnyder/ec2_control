@@ -16,7 +16,6 @@ class EC2_Cluster:
     self.ec2_session = boto3.Session().resource('ec2')
     self.ec2_client=boto3.client('ec2')
 
-
   def create_config(self):
     args = {'ImageId': self.image_id,
     'InstanceType': self.instance_type,
@@ -43,8 +42,17 @@ class EC2_Cluster:
     return args
 
   def create_cluster(self):
-    self.instances = self.ec2_session.create_instances(**self.args)
-    return
+    return self.instances = self.ec2_session.create_instances(**self.args)
+
+  def start_cluster(self):
+    return self.ec2_client.start_instances(InstanceIds=self.instance_ids)
+
+  def stop_cluster(self):
+    return self.ec2_client.stop_instances(InstanceIds=self.instance_ids)
+    
+
+  def terminate_cluster(self):
+    return self.ec2_client.terminate_instances(InstanceIds=self.instance_ids)
 
   @property
   def instance_info(self):
@@ -58,11 +66,11 @@ class EC2_Cluster:
   def public_ips(self):
     instance_info = self.instance_info
     return [info['PublicIpAddress'] for info in reservation['Instances'] \
-                                    for reservation in self.instance_info['Reservations']]
+                                    for reservation in instance_info['Reservations']]
 
   @property
   def private_ips(self):
     instance_info = self.instance_info
     return [info['PrivateIpAddress'] for info in reservation['Instances'] \
-                                    for reservation in self.instance_info['Reservations']]
+                                    for reservation in instance_info['Reservations']]
   
