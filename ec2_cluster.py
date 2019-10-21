@@ -33,7 +33,7 @@ class EC2_Cluster:
       }]
     if self.efa:
       assert self.instance_type in ['p3dn.24xlarge', 'c5n.18xlarge', 'm5dn.24xlarge',
-                                    'r5dn.24xlarge'] print('EFA not available on instance') 
+                                    'r5dn.24xlarge'], 'EFA not available on instance'
       args['NetworkInterfaces'] = [{'SubnetId': self.subnet,
               'DeviceIndex': 0,
               'DeleteOnTermination': True,
@@ -42,17 +42,18 @@ class EC2_Cluster:
     return args
 
   def create_cluster(self):
-    return self.instances = self.ec2_session.create_instances(**self.args)
+    self.instances = self.ec2_session.create_instances(**self.args)
+    return
 
   def start_cluster(self):
-    return self.ec2_client.start_instances(InstanceIds=self.instance_ids)
+    self.ec2_client.start_instances(InstanceIds=self.instance_ids)
 
   def stop_cluster(self):
-    return self.ec2_client.stop_instances(InstanceIds=self.instance_ids)
+    self.ec2_client.stop_instances(InstanceIds=self.instance_ids)
     
 
   def terminate_cluster(self):
-    return self.ec2_client.terminate_instances(InstanceIds=self.instance_ids)
+    self.ec2_client.terminate_instances(InstanceIds=self.instance_ids)
 
   @property
   def instance_info(self):

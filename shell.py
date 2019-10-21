@@ -29,13 +29,11 @@ class Cluster_Shell:
   def master_bash(self, command):
     return self.node_bash(self.master_public_ip, command)
 
-  def worker_bash(self, command):
+  async def worker_bash(self, command):
     """
     asynchronous execution of command on all worker nodes
     """
-    async def async_node_bash(hostname, command):
-      return self.node_bash(hostname, command)
-    tasks = {worker:  asyncio.ensure_future(async_node_bash(worker, command)) \
+    tasks = {worker:  asyncio.ensure_future(node_bash(worker, command)) \
                for worker in self.workers_public_ip}
     await asyncio.wait(tasks)
     result = {worker: task.result() for worker, task in tasks.items()}
