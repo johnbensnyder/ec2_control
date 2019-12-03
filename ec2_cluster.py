@@ -17,28 +17,31 @@ class EC2_Cluster:
     self.ec2_client=boto3.client('ec2')
 
   def create_config(self):
-    args = {'ImageId': self.image_id,
-    'InstanceType': self.instance_type,
-    'MinCount': self.min_nodes if self.min_nodes else self.node_count,
-    'MaxCount': self.node_count,
-    'KeyName': self.keypair}
+    args = {'ImageId': self.ImageId,
+    'InstanceType': self.InstanceType,
+    'MinCount': self.MinCount if self.MinCount else self.MaxCount,
+    'MaxCount': self.MaxCount,
+    'KeyName': self.KeyName}
 
     # add name tag
     args['TagSpecifications'] = [{
         'ResourceType': 'instance',
         'Tags': [{
         'Key': 'Name',
-        'Value': self.name
+        'Value': self.Name
         }]
       }]
-    if self.efa:
-      assert self.instance_type in ['p3dn.24xlarge', 'c5n.18xlarge', 'm5dn.24xlarge',
-                                    'r5dn.24xlarge'], 'EFA not available on instance'
-      args['NetworkInterfaces'] = [{'SubnetId': self.subnet,
+    if self.Efa:
+      assert self.InstanceType in ['p3dn.24xlarge', 'c5n.18xlarge', 'm5dn.24xlarge',
+                                   'r5dn.24xlarge'], 'EFA not available on instance'
+      args['NetworkInterfaces'] = [{'SubnetId': self.SubnetId,
               'DeviceIndex': 0,
               'DeleteOnTermination': True,
               'InterfaceType':'efa',
-              'Groups': self.security_groups}]
+              'Groups': self.SecurityGroups}]
+    else:
+      args['SecurityGroupIds'] = self.SecurityGroups
+
     return args
 
   def create_cluster(self):
@@ -66,12 +69,12 @@ class EC2_Cluster:
   @property
   def public_ips(self):
     instance_info = self.instance_info
-    return [info['PublicIpAddress'] for info in reservation['Instances'] \
-                                    for reservation in instance_info['Reservations']]
+    return [instance['PublicIpAddress'] for instance in [instance for sublist in [reservation['Instances'] \
+             for reservation in self.instance_info['Reservations']] for instance in sublist]]
 
   @property
   def private_ips(self):
     instance_info = self.instance_info
-    return [info['PrivateIpAddress'] for info in reservation['Instances'] \
-                                    for reservation in instance_info['Reservations']]
+    return [instance['PrivateIpAddress'] for instance in [instance for sublist in [reservation['Instances'] \
+             for reservation in self.instance_info['Reservations']] for instance in sublist]]
   

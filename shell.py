@@ -1,11 +1,12 @@
-import boto3
 import paramiko
-import multiprocessing
-import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
-class Cluster_Shell:
-  def __init__(self, cluster, user_name = 'ec2-user'):
+class Cluster_Shell(object):
+  def __init__(self, cluster, user_name = 'ubuntu', async_threads=None):
     self.cluster = cluster
+    self.thread_pool = ThreadPoolExecutor(max_workers=async_threads \
+                                          if async_threads \
+                                          else len(self.cluster.public_ips))
     self.ssh = self.create_connection()
     self.user_name = user_name
     self.master_public_ip = self.cluster.public_ips[0]
@@ -21,24 +22,38 @@ class Cluster_Shell:
   def node_bash(self, hostname, command):
     ssh = self.create_connection()
     ssh.connect(hostname=hostname, username=self.user_name,
-                     key_filename=self.cluster.pemfile)
-    stdin, stdout, stderr = ssh.exec_command(command)
+                     key_filename=self.cluster.KeyFile)
+    results = ssh.exec_command(command)
+    results = [i.readlines() for i in results[1:]]
     ssh.close()
-    return stdin, stdout, stderr
+    return results
 
   def master_bash(self, command):
     return self.node_bash(self.master_public_ip, command)
 
-  async def worker_bash(self, command):
+  def worker_bash(self, command, wait=True):
     """
     asynchronous execution of command on all worker nodes
     """
-    tasks = {worker:  asyncio.ensure_future(node_bash(worker, command)) \
+    tasks = {worker:  self.thread_pool.submit(self.node_bash, worker, command) \
                for worker in self.workers_public_ip}
-    await asyncio.wait(tasks)
-    result = {worker: task.result() for worker, task in tasks.items()}
-    return result
+    return tasks
 
+  def bash(self, command, wait=True):
+    """
+    async execution on all nodes
+    Parameters
+    ----------
+    command
+    wait
+
+    Returns
+    -------
+
+    """
+    tasks = {node: self.thread_pool.submit(self.node_bash, node, command) \
+             for node in self.cluster.public_ips}
+    return tasks
 
 
 
