@@ -31,14 +31,19 @@ class EC2_Cluster:
         'Value': self.Name
         }]
       }]
-    if self.Efa:
-      assert self.InstanceType in ['p3dn.24xlarge', 'c5n.18xlarge', 'm5dn.24xlarge',
-                                   'r5dn.24xlarge'], 'EFA not available on instance'
-      args['NetworkInterfaces'] = [{'SubnetId': self.SubnetId,
-              'DeviceIndex': 0,
-              'DeleteOnTermination': True,
-              'InterfaceType':'efa',
-              'Groups': self.SecurityGroups}]
+    if 'BlockDeviceMappings' in self.__dict__:
+      args['BlockDeviceMappings'] = self.BlockDeviceMappings
+    if 'Efa' in self.__dict__:
+      if self.Efa:
+        assert self.InstanceType in ['p3dn.24xlarge', 'c5n.18xlarge', 'm5dn.24xlarge',
+                                     'r5dn.24xlarge'], 'EFA not available on instance'
+        args['NetworkInterfaces'] = [{'SubnetId': self.SubnetId,
+                'DeviceIndex': 0,
+                'DeleteOnTermination': True,
+                'InterfaceType':'efa',
+                'Groups': self.SecurityGroups}]
+      else:
+        args['SecurityGroupIds'] = self.SecurityGroups
     else:
       args['SecurityGroupIds'] = self.SecurityGroups
 
