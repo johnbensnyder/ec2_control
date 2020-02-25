@@ -51,7 +51,7 @@ def create_container_keys(cluster_shell):
     cluster_shell.bash("sudo chown root:root {}".format('~/ssh_container/config'))
     create_ssh_key(cluster_shell, file_location="~/ssh_container")
 
-def create_container_communicator(cluster_shell, container_name):
+def create_container_communicator(cluster_shell, container_name='mpicont'):
     cluster_shell.bash("touch ~/.ssh/{}.sh".format(container_name))
     com_script = "#!/bin/bash\necho \"entering container\"\n\n" \
                  "docker exec {} /bin/bash -c \\\"\$SSH_ORIGINAL_COMMAND\\\"".format(container_name)
@@ -63,7 +63,7 @@ def create_container_communicator(cluster_shell, container_name):
                    cluster_shell.master_bash('cat /home/ubuntu/ssh_container/id_rsa.pub')[0][0])
     cluster_shell.bash("echo \"{0}\" >> ~/.ssh/authorized_keys".format(key_command))
 
-def connect_nodes(cluster_shell, container_name, gpu_count=8):
+def connect_nodes(cluster_shell, container_name='mpicont', gpu_count=8):
     create_hostfiles(cluster_shell, gpus=gpu_count)
     create_instance_keys(cluster_shell)
     create_container_keys(cluster_shell)
