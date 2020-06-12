@@ -1,0 +1,25 @@
+# Sample configuration file for setting up a single G4dn node
+# running the AWS Deep Learning AMI version 28.0
+
+ImageId: "ami-078a7f1dda72c0775" # DLAMI 28.0
+InstanceType: "g4dn.12xlarge"
+MinCount: 1
+MaxCount: 1
+KeyName: "your_keypair_name"
+Placement:
+  AvailabilityZone: "us-east-1b"
+Monitoring:
+  Enabled: False
+SecurityGroupIds:
+  - "sg-your_security_group"
+SubnetId: "subnet-your_subnet" # subnet needs to match to availability zone
+BlockDeviceMappings:
+  - DeviceName: "/dev/sda1"
+    Ebs:
+      VolumeSize: 1000
+      VolumeType: "gp2"
+TagSpecifications:
+  - ResourceType: "instance"
+    Tags:
+      - Key: "Name"
+        Value: "some_name_for_your_instance"

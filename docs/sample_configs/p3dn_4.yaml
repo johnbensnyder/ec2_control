@@ -1,0 +1,30 @@
+# Sample configuration file for setting up a cluster of 4 P3dn nodes
+# running the AWS Deep Learning AMI version 28.0
+
+ImageId: "ami-0c5642befe8d041bb" # DLAMI 28.0
+InstanceType: "p3dn.24xlarge"
+MinCount: 4
+MaxCount: 4
+KeyName: "your_keypair_name"
+Placement:
+  AvailabilityZone: "us-east-1b"
+  GroupName: "your_placement_group" # Placement group (optional)
+Monitoring:
+  Enabled: False
+NetworkInterfaces: # Enables EFA
+  - SubnetId: "subnet-your_subnet"
+    DeviceIndex: 0
+    DeleteOnTermination: True
+    InterfaceType: "efa"
+    Groups:
+      - "sg-your_security_group"
+BlockDeviceMappings:
+  - DeviceName: "/dev/sda1"
+    Ebs:
+      VolumeSize: 1000
+      VolumeType: "gp2"
+TagSpecifications:
+  - ResourceType: "instance"
+    Tags:
+      - Key: "Name"
+        Value: "some_name_for_your_cluster"
